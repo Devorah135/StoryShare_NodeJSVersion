@@ -47,7 +47,7 @@ app.get('/stories', (req, res) => {
         // 1. Display list from database
         db.query(getStoriesQuery, (err, story_result) => {
            if (err) throw err;
-           console.log("Story List: ", result);
+           console.log("Story List: ", story_result);
 
            if (story_result.length > 0) {
                const stories = story_result.map(story => {
@@ -104,6 +104,18 @@ app.get('/login', (req, res) => {
     });
 });
 
+ // Handle admin login
+app.post('/admin_login', (req, res) => {
+    const { username, password } = req.body;
+    adminLogin(username, password, res);
+});
+
+// Handle form submission and update the list of admins
+app.post('/add_admin_submit', (req, res) => {
+    const { username, password } = req.body;
+    addAdmin(username, password, res);
+});
+
 // Handle contact form submission
 app.post('/contact_form_submit', (req, res) => {
     const { name, email, message } = req.body;
@@ -114,14 +126,14 @@ app.post('/contact_form_submit', (req, res) => {
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-            user: 'storyshare385@gmail.com', // Actual email
-            pass: 'uzhosizbwjquyqsa'         // Password
+            user: 'storyshare358@gmail.com', // Actual email
+            pass: 'tuls dlxj wwvr dwhy'         // Password
         }
     });
 
     const mailOptions = {
-        from: 'storyshare385@gmail.com',
-        to: 'storyshare385@gmail.com',
+        from: 'storyshare358@gmail.com',
+        to: 'storyshare358@gmail.com',
         subject: 'StoryShare Contact Us Submission',
         html: emailContent
     };
@@ -138,9 +150,62 @@ app.post('/contact_form_submit', (req, res) => {
 });
 
 // set up site to run on port 7000
-const server = app.listen(7000, () => {
+const server = app.listen(7001, () => {
     console.log(`Express running → PORT ${server.address().port}`);
 });
+
+// Function to display the list of admins
+function showAdminList(res) {
+    const con = connectToDatabase();
+    const showAdminListQuery = "SELECT username FROM authorizedusers";
+
+    con.query(showAdminListQuery, function (err, results) {
+        if (err) {
+            console.error('Error fetching admin list:', err);
+            res.status(500).send('Error fetching admin list. Please try again later.');
+            return;
+        }
+        res.render('admin_list', {
+            adminList: results.map(row => row.username),
+            title: 'Admin List'
+        });
+    });
+}
+// Function to handle admin login
+function adminLogin(username, password, res) {
+    const con = connectToDatabase();
+    const query = 'SELECT * FROM authorizedusers WHERE username = ? AND password = ?';
+
+    con.query(query, [username, password], function (err, results) {
+        if (err) {
+            console.error('Error executing admin login query:', err);
+            res.status(500).send('Error during login. Please try again later.');
+            return;
+        }
+        if (results.length > 0) {
+            res.send('Login successful');
+        } else {
+            res.send('Invalid credentials');
+        }
+    });
+}
+
+// Function to handle adding a new admin
+function addAdmin(username, password, res) {
+    const con = connectToDatabase();
+    const addAdminQuery = 'INSERT INTO authorizedusers (username, password) VALUES (?, ?)';
+
+    con.query(addAdminQuery, [username, password], function (err, result) {
+        if (err) {
+            console.error('Error adding admin:', err);
+            res.status(500).send('Error adding admin. Please try again later.');
+            return;
+        }
+
+        console.log('Admin added successfully!');
+        showAdminList(res); // Display the updated admin list
+    });
+}
 
 function getStories(stories, res) {
     const getStoriesQuery = "SELECT * FROM stories";
@@ -192,7 +257,7 @@ function getStories(stories, res) {
 function connectToDatabase() {
     const con = mysql.createConnection({
         host: "localhost",
-        username: "root",
+        user: "root",
         password: "",
         database: "stories",
     });
