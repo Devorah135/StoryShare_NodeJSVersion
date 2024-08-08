@@ -3,6 +3,11 @@ html
     head
         title #{title}
         link(rel='stylesheet', href='/css/styles.css')
+        link(rel="stylesheet", href='ResponsiveSlides.js-master/responsiveslides.css')
+        link(rel='stylesheet', href='adnantopal-slimmenu-c264256/dist/css/slimmenu.min.css')
+        script(src="jquery.slimmenu.js")
+        script(src="//cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js")
+        script(src="ResponsiveSlides.js-master/responsiveslides.js")
         meta(name="viewport" content="width=device-width, initial-scale=1")
     body
         header
@@ -25,13 +30,13 @@ html
                 li
                     a(href='/login')
                         | Admin Login
+
         block main
         footer
             p
                 | &copy; 2024 - Sara Bleier, Deborah Schonkopf, Tova Krupka
 
-        script(src="jquery.slimmenu.js")
-        script(src="//cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js")
+        script(src="adnantopal-slimmenu-c264256/dist/js/jquery.slimmenu.min.js")
         script.
             $('#navigation').slimmenu({
                 resizeWidth: '700',

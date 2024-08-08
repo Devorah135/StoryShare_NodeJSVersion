@@ -50,7 +50,7 @@ app.get('/stories', (req, res) => {
            console.log("Story List: ", story_result);
 
            if (story_result.length > 0) {
-               const stories = story_result.map(story => {
+               let stories = story_result.map(story => {
                     const { title, author, content, is_approved,
                         show_email, author_email, topic_ids } = story;
 
