@@ -14,8 +14,10 @@ block main
                     p.story
                         h4= story.title
                         strong Author:
+                        = ' '
                         = story.author
                         if story.show_email
+                            = ' '
                             em= story.author_email
                         blockquote= story.content
                         if story.topic_names.length
