@@ -1,0 +1,18 @@
+extends default
+
+block main
+    h1 Admin Login:
+
+    form(method="post" action="/admin_login" class="narrow-form")
+        .form-group
+            label(for="username")
+                | Username:
+            input.form-input(type="text" name="username" id="username" required)
+        .form-group
+            label(for="password")
+                | Password:
+            input.form-input(type="password" name="password" id="password" required)
+        br
+        button(type="submit" value="login" class="btn btn-primary") Submit
+    br
+    br
