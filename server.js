@@ -2,8 +2,17 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const nodemailer = require('nodemailer');
 const mysql = require('mysql');
+const session = require('express-session');  // Add this line
 
 const app = express();
+
+app.use(session({
+    secret: 'we-love-358!',  // Replace with a secure secret key
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false }  // Set to true if you're using HTTPS
+}));
+
 
 // tell server that we are using pug as our template engine
 app.set('view engine', 'pug');
@@ -104,10 +113,114 @@ app.get('/login', (req, res) => {
     });
 });
 
+//route for admin_stories
+app.get('/admin_stories', (req, res) => {
+        const username = req.session.username;
+
+        if (!username) {
+            res.redirect('/login');  // Redirect to login if not logged in
+            return;
+        }
+        const getStoriesQuery = "SELECT * FROM stories";
+
+        const db = connectToDatabase();
+
+        // 1. Display list from database
+        db.query(getStoriesQuery, (err, story_result) => {
+           if (err) throw err;
+           console.log("Story List: ", story_result);
+
+           if (story_result.length > 0) {
+               let stories = story_result.map(story => {
+                    const {story_id, title, author, content, is_approved,
+                        show_email, author_email, topic_ids } = story;
+
+                // Get topic names if topic_ids is not empty
+                let topic_names = [];
+                if (topic_ids) {
+                    const topics_query = `SELECT topic_name FROM topics WHERE topic_id IN (${topic_ids})`;
+
+                    db.query(topics_query, (err, topics_result) => {
+                        if (err) {
+                            console.error('Error executing topics query:', err);
+                            return;
+                        }
+
+                        topic_names = topics_result.map(topic => topic.topic_name);
+                    });
+                }
+
+                return {
+                    story_id,
+                    title,
+                    author,
+                    content,
+                    is_approved,
+                    show_email,
+                    author_email,
+                    topic_names
+                };
+               });
+                res.render('admin_stories', {
+                    title:'Browse and Approve Stories',
+                    stories,
+                    username});
+                } else {
+                    res.render('admin_stories', {
+                        title:'Browse and Approve Stories',
+                        stories: [],
+                        username});
+                }
+        })
+        // Add any other data you need to pass to the template
+});
+
+//route to approve stories
+app.post('/approve_story', (req, res) => {
+    const storyId = req.body.story_id;
+    const username = req.session.username;  // Get username from session
+
+
+    // Connect to the database
+    const con = connectToDatabase();
+    const query = 'UPDATE stories SET is_approved = 1 WHERE story_id = ?';
+
+    con.query(query, [storyId], function (err, results) {
+        if (err) {
+            console.error('Error updating story approval:', err);
+            res.status(500).send('Error approving story. Please try again later.');
+            return;
+        }
+
+        // Redirect back to the stories page after updating
+        res.redirect(`/admin_stories?username=${encodeURIComponent(username)}`);
+    });
+});
+
+// Route to handle story deletion
+app.post('/delete_story', (req, res) => {
+    const storyId = req.body.story_id;
+    const username = req.session.username;  // Get username from session
+
+    const con = connectToDatabase();
+    const query = 'DELETE FROM stories WHERE story_id = ?';
+
+    con.query(query, [storyId], (err, results) => {
+        if (err) {
+            console.error('Error deleting story:', err);
+            res.status(500).send('Error during deletion. Please try again later.');
+            return;
+        }
+        console.log('Delete results:', results);
+        res.redirect(`/admin_stories?username=${encodeURIComponent(username)}`);
+    });
+});
+
+
  // Handle admin login
 app.post('/admin_login', (req, res) => {
     const { username, password } = req.body;
-    adminLogin(username, password, res);
+    adminLogin(req, username, password, res);
 });
 
 // Handle form submission and update the list of admins
@@ -172,7 +285,7 @@ function showAdminList(res) {
     });
 }
 // Function to handle admin login
-function adminLogin(username, password, res) {
+function adminLogin(req, username, password, res) {
     const con = connectToDatabase();
     const query = 'SELECT * FROM authorizedusers WHERE username = ? AND password = ?';
 
@@ -183,7 +296,9 @@ function adminLogin(username, password, res) {
             return;
         }
         if (results.length > 0) {
-            res.send('Login successful');
+            req.session.password=password;
+            req.session.username = username;  // Store username in session
+            res.redirect('/admin_stories');
         } else {
             res.send('Invalid credentials');
         }
