@@ -24,11 +24,11 @@ block main
                 else
                     small.topics No topics chosen.
                 if !story.is_approved
-                    form(method="post" action="/approve_story" style="display:inline;" class="approve_form")
+                    form(method="post" action="/approve_story" style="display:inline;" class="approve-form")
                         input(type="hidden" name="story_id" value=story.story_id)
                         button(type="submit" name="approve_story" class="btn btn-primary") Approve Story
                 // Form to delete the story
-                form(method="post" action="/delete_story" style="display:inline;" class="delete_form")
+                form(method="post" action="/delete_story" style="display:inline;" class="delete-form")
                     input(type="hidden" name="story_id" value=story.story_id)
                     button(type="submit" name="delete_story" class="btn btn-danger") Delete Story
 

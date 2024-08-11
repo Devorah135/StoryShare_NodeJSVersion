@@ -1,25 +1,34 @@
 extends default
 
 block main
-    h1 Contact Us
+    if showResult
+        if success
+            h1 Email Sent Successfully!
+            p Your message has been sent. We'll get back to you soon.
+        else
+            h1 Error Sending Email
+            p There was an issue sending your message. Please try again later.
 
-    form(action="/contact_form_submit" method="post" class="narrow-form")
-        .form-group
-            label(for="name") Name (Optional):
-            input(type="text" name="name" id="name" class="form-input")
+        a(href="/contact" class="back-link") Back to Contact Form
+    else
+        h1 Contact Us
 
-        .form-group
-            label(for="email") Email Address (Required):
-            input(type="email" name="email" id="email" class="form-input" required)
+        form(action="/contact_form_submit" method="post" class="narrow-form")
+            .form-group
+                label(for="name") Name (Optional):
+                input(type="text" name="name" id="name" class="form-input")
 
-        .form-group
-            label(for="message") Message:
-            textarea(name="message" id="message" rows="5" class="form-input" required)
+            .form-group
+                label(for="email") Email Address (Required):
+                input(type="email" name="email" id="email" class="form-input" required)
 
-        button(type="submit" name="submit" class="btn btn-primary") Send Message
+            .form-group
+                label(for="message") Message:
+                textarea(name="message" id="message" rows="5" class="form-input" required)
 
+            button(type="submit" name="submit" class="btn btn-primary") Send Message
 
-    h2 Contact Information:
+        h2 Contact Information:
 
         .contact-info
             p

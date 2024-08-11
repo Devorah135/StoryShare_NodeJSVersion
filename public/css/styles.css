@@ -68,6 +68,14 @@ body,  p{
     object-fit: contain;
 }
 
+
+.back-link {
+    display: block;
+    text-align: center;
+    margin-top: 50px; /* Move it further down the page */
+    font-size: 18px;
+}
+
 .rslides {
   position: relative;
   list-style: none;

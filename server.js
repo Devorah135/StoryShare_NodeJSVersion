@@ -252,13 +252,13 @@ app.post('/contact_form_submit', (req, res) => {
     };
 
     transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-            console.error(error);
-            res.status(500).send('Error sending email. Please try again later.');  // Send error response
-        } else {
-            console.log('Email sent: ' + info.response);
-            res.status(200).send('Form submitted successfully!'); // Send success response
-        }
+            if (error) {
+                console.error(error);
+                res.render('contact', { showResult: true, success: false });
+            } else {
+                console.log('Email sent: ' + info.response);
+                res.render('contact', { showResult: true, success: true });
+            }
     });
 });
 
