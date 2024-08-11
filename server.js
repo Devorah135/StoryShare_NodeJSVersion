@@ -6,11 +6,12 @@ const session = require('express-session');  // Add this line
 
 const app = express();
 
+// set a session
 app.use(session({
     secret: 'we-love-358!',  // Replace with a secure secret key
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false }  // Set to true if you're using HTTPS
+    cookie: {secure: false}  // Set to true if you're using HTTPS
 }));
 
 
@@ -21,13 +22,15 @@ app.set('view engine', 'pug');
 app.use(express.static(__dirname + '/public'));
 
 // Use body-parser to parse POST request body
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({extended: false}));
+
+/** ROUTES **/
 
 // add a root route - home page
 app.get('/', (req, res) => {
     // render the index.pug template and pass title variable
     res.render('home', {
-        title:'Home Page'
+        title: 'Home Page'
     });
 });
 
@@ -35,45 +38,46 @@ app.get('/', (req, res) => {
 app.get('/home', (req, res) => {
     // render the index.pug template and pass title variable
     res.render('home', {
-        title:'Home Page'
+        title: 'Home Page'
     });
 });
 
 // route for submit story
 app.get('/submit_story', (req, res) => {
     res.render('submit_story', {
-        title:'Submit Story'
+        title: 'Submit Story'
     });
 });
 
 // route for browse stories
 app.get('/stories', (req, res) => {
-
     const getStoriesQuery = "SELECT * FROM stories";
-
     const db = connectToDatabase();
 
-        // 1. Display list from database
-        db.query(getStoriesQuery, (err, story_result) => {
-           if (err) throw err;
-           console.log("Story List: ", story_result);
+    // 1. Display list from database
+    db.query(getStoriesQuery, (err, story_result) => {
+        if (err) throw err;
+        console.log("Story List: ", story_result);
 
-           if (story_result.length > 0) {
-               let stories = story_result.map(story => {
-                    const { title, author, content, is_approved,
-                        show_email, author_email, topic_ids } = story;
+        if (story_result.length > 0) {
+            let stories = story_result.map(story => {
+                const {
+                    title, author, content, is_approved,
+                    show_email, author_email, topic_ids
+                } = story;
 
                 // Get topic names if topic_ids is not empty
                 let topic_names = [];
                 if (topic_ids) {
-                    const topics_query = `SELECT topic_name FROM topics WHERE topic_id IN (${topic_ids})`;
+                    const topics_query = `SELECT topic_name
+                                          FROM topics
+                                          WHERE topic_id IN (${topic_ids})`;
 
                     db.query(topics_query, (err, topics_result) => {
                         if (err) {
                             console.error('Error executing topics query:', err);
                             return;
                         }
-
                         topic_names = topics_result.map(topic => topic.topic_name);
                     });
                 }
@@ -87,58 +91,63 @@ app.get('/stories', (req, res) => {
                     author_email,
                     topic_names
                 };
-               });
-                res.render('stories', {
-                    title:'Browse Stories',
-                    stories });
-                } else {
-                    res.render('stories', {
-                        title:'Browse Stories',
-                        stories: [] });
-                }
-        });
+            });
+            res.render('stories', {
+                title: 'Browse Stories',
+                stories,
+            });
+        } else {
+            res.render('stories', {
+                title: 'Browse Stories',
+                stories: [],
+            });
+        }
+    });
 });
 
 // route for contact
 app.get('/contact', (req, res) => {
     res.render('contact', {
-        title:'Contact Us'
+        title: 'Contact Us'
     });
 });
 
 // route for login
 app.get('/login', (req, res) => {
     res.render('login', {
-        title:'Admin Login'
+        title: 'Admin Login'
     });
 });
 
 //route for admin_stories
 app.get('/admin_stories', (req, res) => {
-        const username = req.session.username;
+    const username = req.session.username;
+    if (!username) {
+        res.redirect('/login');  // Redirect to login if not logged in
+        return;
+    }
 
-        if (!username) {
-            res.redirect('/login');  // Redirect to login if not logged in
-            return;
-        }
-        const getStoriesQuery = "SELECT * FROM stories";
+    const getStoriesQuery = "SELECT * FROM stories";
+    const db = connectToDatabase();
 
-        const db = connectToDatabase();
+    // 1. Display list from database
+    db.query(getStoriesQuery, (err, story_result) => {
+        if (err) throw err;
+        console.log("Story List: ", story_result);
 
-        // 1. Display list from database
-        db.query(getStoriesQuery, (err, story_result) => {
-           if (err) throw err;
-           console.log("Story List: ", story_result);
-
-           if (story_result.length > 0) {
-               let stories = story_result.map(story => {
-                    const {story_id, title, author, content, is_approved,
-                        show_email, author_email, topic_ids } = story;
+        if (story_result.length > 0) {
+            let stories = story_result.map(story => {
+                const {
+                    story_id, title, author, content, is_approved,
+                    show_email, author_email, topic_ids
+                } = story;
 
                 // Get topic names if topic_ids is not empty
                 let topic_names = [];
                 if (topic_ids) {
-                    const topics_query = `SELECT topic_name FROM topics WHERE topic_id IN (${topic_ids})`;
+                    const topics_query = `SELECT topic_name
+                                          FROM topics
+                                          WHERE topic_id IN (${topic_ids})`;
 
                     db.query(topics_query, (err, topics_result) => {
                         if (err) {
@@ -160,19 +169,21 @@ app.get('/admin_stories', (req, res) => {
                     author_email,
                     topic_names
                 };
-               });
-                res.render('admin_stories', {
-                    title:'Browse and Approve Stories',
-                    stories,
-                    username});
-                } else {
-                    res.render('admin_stories', {
-                        title:'Browse and Approve Stories',
-                        stories: [],
-                        username});
-                }
-        })
-        // Add any other data you need to pass to the template
+            });
+            res.render('admin_stories', {
+                title: 'Browse and Approve Stories',
+                stories,
+                username
+            });
+        } else {
+            res.render('admin_stories', {
+                title: 'Browse and Approve Stories',
+                stories: [],
+                username
+            });
+        }
+    })
+    // Add any other data you need to pass to the template
 });
 
 //route to approve stories
@@ -184,6 +195,27 @@ app.post('/approve_story', (req, res) => {
     // Connect to the database
     const con = connectToDatabase();
     const query = 'UPDATE stories SET is_approved = 1 WHERE story_id = ?';
+
+    con.query(query, [storyId], function (err, results) {
+        if (err) {
+            console.error('Error updating story approval:', err);
+            res.status(500).send('Error approving story. Please try again later.');
+            return;
+        }
+
+        // Redirect back to the stories page after updating
+        res.redirect(`/admin_stories?username=${encodeURIComponent(username)}`);
+    });
+});
+
+// route to disapprove stories
+app.post('/disapprove_story', (req, res) => {
+    const storyId = req.body.story_id;
+    const username = req.session.username;  // Get username from session
+
+    // Connect to the database
+    const con = connectToDatabase();
+    const query = 'UPDATE stories SET is_approved = 0 WHERE story_id = ?';
 
     con.query(query, [storyId], function (err, results) {
         if (err) {
@@ -217,21 +249,21 @@ app.post('/delete_story', (req, res) => {
 });
 
 
- // Handle admin login
+// Handle admin login
 app.post('/admin_login', (req, res) => {
-    const { username, password } = req.body;
+    const {username, password} = req.body;
     adminLogin(req, username, password, res);
 });
 
 // Handle form submission and update the list of admins
 app.post('/add_admin_submit', (req, res) => {
-    const { username, password } = req.body;
+    const {username, password} = req.body;
     addAdmin(username, password, res);
 });
 
 // Handle contact form submission
 app.post('/contact_form_submit', (req, res) => {
-    const { name, email, message } = req.body;
+    const {name, email, message} = req.body;
 
     const emailContent = `Name: ${name || 'N/A'}\nEmail: ${email}\nMessage: ${message}`;
 
@@ -284,6 +316,7 @@ function showAdminList(res) {
         });
     });
 }
+
 // Function to handle admin login
 function adminLogin(req, username, password, res) {
     const con = connectToDatabase();
@@ -296,7 +329,7 @@ function adminLogin(req, username, password, res) {
             return;
         }
         if (results.length > 0) {
-            req.session.password=password;
+            req.session.password = password;
             req.session.username = username;  // Store username in session
             res.redirect('/admin_stories');
         } else {
@@ -327,20 +360,24 @@ function getStories(stories, res) {
 
     const db = connectToDatabase();
 
-        // 1. Display list from database
-        db.query(getStoriesQuery, (err, story_result) => {
-           if (err) throw err;
-           console.log("Story List: ", result);
+    // 1. Display list from database
+    db.query(getStoriesQuery, (err, story_result) => {
+        if (err) throw err;
+        console.log("Story List: ", result);
 
-           if (story_result.length > 0) {
-               const stories = story_result.map(story => {
-                    const { title, author, content, is_approved,
-                        show_email, author_email, topic_ids } = story;
+        if (story_result.length > 0) {
+            const stories = story_result.map(story => {
+                const {
+                    title, author, content, is_approved,
+                    show_email, author_email, topic_ids
+                } = story;
 
                 // Get topic names if topic_ids is not empty
                 let topic_names = [];
                 if (topic_ids) {
-                    const topics_query = `SELECT topic_name FROM topics WHERE topic_id IN (${topic_ids})`;
+                    const topics_query = `SELECT topic_name
+                                          FROM topics
+                                          WHERE topic_id IN (${topic_ids})`;
 
                     db.query(topics_query, (err, topics_result) => {
                         if (err) {
@@ -361,12 +398,12 @@ function getStories(stories, res) {
                     author_email,
                     topic_names
                 };
-               });
-                res.render('stories', { stories });
-                } else {
-                    res.render('stories', { stories: [] });
-                }
-        });
+            });
+            res.render('stories', {stories});
+        } else {
+            res.render('stories', {stories: []});
+        }
+    });
 }
 
 function connectToDatabase() {

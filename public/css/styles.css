@@ -206,3 +206,19 @@ footer {
 body {
     margin: 0;
 }
+
+#approved-stories h2, hr {
+    color: forestgreen;
+}
+
+#not-approved-stories h2, hr {
+    color: red;
+}
+
+#approved-stories h2, #not-approved-stories h2 {
+    text-decoration: underline;
+}
+
+#approved-stories .btn, #not-approved-stories .btn {
+    margin: 10px 10px 0 0;
+}

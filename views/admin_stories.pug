@@ -1,66 +1,99 @@
 extends default
 block main
+    div.content
 
-    // - let stories = [];
-    // - stories = list;
-    p Hello, #{username}!
-    h1 Browse and Approve Stories
+        // - let stories = [];
+        // - stories = list;
+        p Hello, #{username}!
+        h1 Browse and Approve Stories
 
-    if stories.length
-        each story in stories
-            hr
-            p.story
-                h4= story.title
-                strong Author:
-                | #{story.author}
 
-                if story.show_email
-                    em= story.author_email
-                blockquote= story.content
-                if story.topic_names.length
-                    small.topics
-                        | Topics:
-                        | #{story.topic_names.join(', ')}
-                else
-                    small.topics No topics chosen.
-                if !story.is_approved
-                    form(method="post" action="/approve_story" style="display:inline;" class="approve-form")
-                        input(type="hidden" name="story_id" value=story.story_id)
-                        button(type="submit" name="approve_story" class="btn btn-primary") Approve Story
-                // Form to delete the story
-                form(method="post" action="/delete_story" style="display:inline;" class="delete-form")
-                    input(type="hidden" name="story_id" value=story.story_id)
-                    button(type="submit" name="delete_story" class="btn btn-danger") Delete Story
+        if stories.length
+            #not-approved-stories
+                h2 Stories waiting approval:
+                each story in stories
+                    if (story.is_approved === 0)
+                        hr
+                        p.story
+                            h4= story.title
+                            strong Author:
+                            =  story.author
 
-    else
-        p No stories found.
+                            if story.show_email
+                                em=  story.author_email
+                            blockquote= story.content
+                            if story.topic_names.length
+                                small.topics
+                                    | Topics:
+                                    | #{story.topic_names.join(', ')}
+                            else
+                                small.topics No topics chosen.
+                            br
+                            // Button to approve the story
+                            form(method="post" action="/approve_story" style="display:inline;" class="approve_form")
+                                input(type="hidden" name="story_id" value=story.story_id)
+                                button(type="submit" name="approve_story" class="btn btn-primary") Approve Story
+                            // Form to delete the story
+                            form(method="post" action="/delete_story" style="display:inline;" class="delete_form")
+                                input(type="hidden" name="story_id" value=story.story_id)
+                                button(type="submit" name="delete_story" class="btn btn-danger") Delete Story
+            #approved-stories
+                h2 Approved stories:
+                each story in stories
+                    if (story.is_approved === 1)
+                            hr
+                            p.story
+                                h4= story.title
+                                strong Author:
+                                =  story.author
 
-    // JavaScript to handle confirmation before deleting or approving a story
-    script.
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('JavaScript loaded'); // Add this line to check if the script runs
+                                if story.show_email
+                                    em=  story.author_email
+                                blockquote= story.content
+                                if story.topic_names.length
+                                    small.topics
+                                        | Topics:
+                                        | #{story.topic_names.join(', ')}
+                                else
+                                    small.topics No topics chosen.
+                                br
+                                // Button to dis-approve the story
+                                form(method="post" action="/disapprove_story" style="display:inline;" class="approve_form")
+                                    input(type="hidden" name="story_id" value=story.story_id)
+                                    button(type="submit" name="disapprove_story" class="btn btn-primary") Disapprove Story
+                                // Form to delete the story
+                                form(method="post" action="/delete_story" style="display:inline;" class="delete_form")
+                                    input(type="hidden" name="story_id" value=story.story_id)
+                                    button(type="submit" name="delete_story" class="btn btn-danger") Delete Story
+        else
+            p No stories found.
 
-            // Handle delete confirmation
-            const deleteForms = document.querySelectorAll('.delete-form');
-            deleteForms.forEach(form => {
-                form.addEventListener('submit', function(event){
-                    event.preventDefault(); // Prevent the default form submission
-                    const confirmed = confirm('Are you sure you want to delete this story?');
-                    if (confirmed) {
-                        form.submit(); // Submit the form if confirmed
-                    }
+        // JavaScript to handle confirmation before deleting or approving a story
+        script.
+            document.addEventListener('DOMContentLoaded', function() {
+                console.log('JavaScript loaded'); // Add this line to check if the script runs
+
+                // Handle delete confirmation
+                const deleteForms = document.querySelectorAll('.delete-form');
+                deleteForms.forEach(form => {
+                    form.addEventListener('submit', function(event){
+                        event.preventDefault(); // Prevent the default form submission
+                        const confirmed = confirm('Are you sure you want to delete this story?');
+                        if (confirmed) {
+                            form.submit(); // Submit the form if confirmed
+                        }
+                    });
+                });
+
+                 // Handle approve confirmation
+                const approveForms = document.querySelectorAll('.approve-form');
+                approveForms.forEach(form => {
+                    form.addEventListener('submit', function(event) {
+                        event.preventDefault(); // Prevent the default form submission
+                        const confirmed = confirm('Are you sure you want to approve this story?');
+                        if (confirmed) {
+                            form.submit(); // Submit the form if confirmed
+                        }
+                    });
                 });
             });
-
-             // Handle approve confirmation
-            const approveForms = document.querySelectorAll('.approve-form');
-            approveForms.forEach(form => {
-                form.addEventListener('submit', function(event) {
-                    event.preventDefault(); // Prevent the default form submission
-                    const confirmed = confirm('Are you sure you want to approve this story?');
-                    if (confirmed) {
-                        form.submit(); // Submit the form if confirmed
-                    }
-                });
-            });
-        });

@@ -7,6 +7,9 @@ block main
     .content
         h1 Browse Stories
 
+        a(href="/admin_stories")
+            button View Unapproved Stories
+
         if stories.length
             each story in stories
                 if story.is_approved
