@@ -53,6 +53,7 @@ app.get('/submit_story', (req, res) => {
 app.get('/stories', (req, res) => {
     const getStoriesQuery = "SELECT * FROM stories";
     const db = connectToDatabase();
+    const username = req.session.username;
 
     // 1. Display list from database
     db.query(getStoriesQuery, (err, story_result) => {
@@ -95,11 +96,13 @@ app.get('/stories', (req, res) => {
             res.render('stories', {
                 title: 'Browse Stories',
                 stories,
+                username
             });
         } else {
             res.render('stories', {
                 title: 'Browse Stories',
                 stories: [],
+                username
             });
         }
     });
