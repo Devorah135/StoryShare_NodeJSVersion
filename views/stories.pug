@@ -4,24 +4,26 @@ block main
     // - let stories = [];
     // - stories = list;
 
+    .content
+        h1 Browse Stories
 
-    h1 Browse Stories
-
-    if stories.length
-        each story in stories
-            if story.is_approved
-                hr
-                p.story
-                    h4= story.title
-                    strong Author:
-                    = story.author
-                    if story.show_email
-                        em= story.author_email
-                    blockquote= story.content
-                    if story.topic_names.length
-                        small.topics Topics:
-                            = story.topic_names.join(', ')
-                    else
-                        small.topics No topics chosen.
-            else
-                p No stories found.
+        if stories.length
+            each story in stories
+                if story.is_approved
+                    hr
+                    p.story
+                        h4= story.title
+                        strong Author:
+                        = ' '
+                        = story.author
+                        if story.show_email
+                            = ' '
+                            em= story.author_email
+                        blockquote= story.content
+                        if story.topic_names.length
+                            small.topics Topics:
+                                = story.topic_names.join(', ')
+                        else
+                            small.topics No topics chosen.
+        else
+            p No stories found.
