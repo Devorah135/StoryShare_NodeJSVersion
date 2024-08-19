@@ -1,1 +1,72 @@
 extends default
+
+block main
+
+    // Fetch topics from the database
+    // - var sql_topics = "SELECT * FROM topics";
+    // - var result_topics = conn.query(sql_topics);
+    //
+    // // Fetch positions from the database
+    // - var sql_positions = "SELECT * FROM positions";
+    // - var result_positions = conn.query(sql_positions);
+
+    form(name="StorySubmission", method="post", action="/results")
+        #submission-fields
+            // User information
+            fieldset#user_info
+                legend User Information
+                .form-group
+                    label(for="fname") First Name:*
+                    input(type="text", id="fname", class="form-input", name="first_name", placeholder="First", size="8", required)
+
+                .form-group
+                    label(for="lname") Last Name:*
+                    input(type="text", id="lname", class="form-input", name="last_name", placeholder="Last", size="8", required)
+
+                .form-group
+                    label(for="email") Email:*
+                    input(type="email", id="email", class="form-input", name="email", placeholder="story@example.com", required)
+                    br
+
+                input(type="checkbox", id="show_email", name="show_email", value="show_email")
+                label(for="show_email") Share Email with Users?
+                br
+                br
+
+                .form-group
+                    label(for="position") Position*
+                    br
+                    select(name="position", id="position", class="form-input", required)
+                        if positions
+                            each position in positions
+                                option(value=`${position.position_id}`) #{position.position_name}
+                        else
+                            option(value="") No positions available
+
+            // Story information
+            fieldset#story_info
+                legend Story Information
+                #title-and-story
+                    .form-group
+                        label(for="title") Story Title:
+                        input(type="text", class="form-input", name="title", id="title", required)
+
+                    .form-group
+                        label(for="story") Enter the story:
+                        br
+                        textarea(id="story", class="form-input", name="story", rows="5", cols="40", placeholder="Your story here:", required)
+
+                // Topics
+                #topics
+                    span Choose which topics your story belongs to:
+                    br
+                    if topics
+                        each topic in topics
+                            - var topicId = topic.topic_id;
+                            - var topicName = topic.topic_name;
+                            input(type="checkbox", id=topicId, name='topic[]', value=topicId)
+                            label(for=topicId) #{topicName}
+                            br
+                    else
+                        | No topics available.
+        button(type="submit", value="submit", class="btn btn-primary") Submit Story
