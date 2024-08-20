@@ -57,7 +57,8 @@ app.get('/submit_story', (req, res) => {
                 return res.status(500).send("Error fetching positions");
             }
 
-            res.render('submit_story', { title: 'Submit Story', topics, positions });
+            res.render('submit_story',
+                { title: 'Submit Story', topics, positions });
         });
     });
 });
@@ -87,7 +88,10 @@ app.post('/results', (req, res) => {
             console.error('Database query error:', err);
             return res.status(500).send('Error saving story to the database.');
         }
-        res.send('Story added successfully.');
+    });
+
+    res.render('submit_results', {
+        title: title
     });
 });
 
@@ -135,9 +139,9 @@ app.get('/stories', (req, res) => {
                 }
             });
         });
-
+        const username = req.session.username;
         Promise.all(processedStories)
-            .then(stories => res.render('stories', { title: 'Browse Stories', stories }))
+            .then(stories => res.render('stories', { title: 'Browse Stories', stories, username }))
             .catch(err => {
                 console.error('Error processing stories:', err);
                 res.status(500).send('Error processing stories');
