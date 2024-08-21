@@ -126,8 +126,7 @@ app.get('/stories', (req, res) => {
                 let topicNames = [];
                 if (topic_ids) {
                     const topicsQuery = `SELECT topic_name FROM topics WHERE topic_id IN (${topic_ids.split(',').map(() => '?').join(',')})`;
-                    queryDatabase(topicsQuery, topic_ids.split(','), (err, results) => {
-                        if (err) {
+                    queryDatabase(topicsQuery, JSON.parse(topic_ids), (err, results) => {                        if (err) {
                             reject(err);
                         } else {
                             topicNames = results.map(row => row.topic_name);
@@ -174,8 +173,10 @@ app.get('/admin_stories', (req, res) => {
                 let topicNames = [];
                 if (topic_ids) {
                     const topicsQuery = `SELECT topic_name FROM topics WHERE topic_id IN (${topic_ids.split(',').map(() => '?').join(',')})`;
-                    queryDatabase(topicsQuery, topic_ids.split(','), (err, results) => {
-                        if (err) {
+                    console.log("Topic IDs:", topic_ids);
+                    console.log("Constructed SQL Query:", topicsQuery);
+                    console.log("Query Parameters:", topic_ids.split(','));
+                    queryDatabase(topicsQuery, JSON.parse(topic_ids), (err, results) => {                        if (err) {
                             reject(err);
                         } else {
                             topicNames = results.map(row => row.topic_name);
