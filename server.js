@@ -261,7 +261,7 @@ app.post('/contact_form_submit', (req, res) => {
         service: 'gmail',
         auth: {
             user: 'storyshare358@gmail.com',
-            pass: 'your_password' // Replace with actual password
+            pass: 'tuls dlxj wwvr dwhy' // Replace with actual password
         }
     });
 
